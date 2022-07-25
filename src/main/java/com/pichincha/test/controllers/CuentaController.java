@@ -18,20 +18,23 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.annotations.ApiOperation;
 
 @RestController
-@RequestMapping(value = "/api/cuentas")
+@RequestMapping(value = "/test/cuentas")
 public class CuentaController {
 
 	@Autowired
 	private CuentaService cuentaService;
 
-	@ApiOperation(value = "creacion de una cuenta.")
-	@PutMapping("/put")
-	public ResponseEntity<?> crearCuenta(@RequestBody CuentaDto CuentaDto) {
-		return cuentaService.crearCuenta(CuentaDto);
+	@ApiOperation(value = "Creación de una cuenta.")
+	@PutMapping("/update")
+	public ResponseEntity<?> crearCuenta(@RequestBody CuentaDto cuentaDto) {
+		Cuenta cuenta = cuentaService.crearCuenta(cuentaDto);
+		return cuenta != null
+				? ResponseEntity.ok(cuenta)
+				: ResponseEntity.notFound().build();
 	}
 
 	@ApiOperation(value = "edicion de una Cuenta.")
-	@PostMapping("/post")
+	@PostMapping("/create")
 	public ResponseEntity<?> editarCuenta(@RequestBody CuentaDto cuentaDto) {
 		return cuentaService.editarCuenta(cuentaDto);
 	}

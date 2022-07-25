@@ -8,8 +8,8 @@ import java.util.List;
 import com.pichincha.test.dto.MovimientoDto;
 import com.pichincha.test.entities.Cuenta;
 import com.pichincha.test.entities.Movimiento;
-import com.pichincha.test.excepions.EntityNotFoundException;
-import com.pichincha.test.excepions.NotStoreException;
+import com.pichincha.test.exception.EntityNotFoundException;
+import com.pichincha.test.exception.NotStoreException;
 import com.pichincha.test.repositories.CuentaRepository;
 import com.pichincha.test.repositories.MovimientoRepository;
 

@@ -2,15 +2,15 @@ package com.pichincha.test.services;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.pichincha.test.dto.ReporteDto;
 import com.pichincha.test.entities.Cliente;
 import com.pichincha.test.entities.Cuenta;
 import com.pichincha.test.entities.Movimiento;
-import com.pichincha.test.excepions.EntityNotFoundException;
-import com.pichincha.test.repositories.ClienteRepository;
+import com.pichincha.test.exception.EntityNotFoundException;
 import com.pichincha.test.repositories.CuentaRepository;
 import com.pichincha.test.repositories.MovimientoRepository;
 
@@ -26,8 +26,9 @@ public class ReporteService {
     @Autowired
     private CuentaRepository cuentaRepository;
 
+
     @Autowired
-    private ClienteRepository clienteRepository;
+    private ClienteService clienteService;
 
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
@@ -37,7 +38,7 @@ public class ReporteService {
         if (validar(fechaInicial)) {
             if (validar(fechaFin)) {
                 if (clienteId != null) {
-                    Cliente cliente = clienteRepository.findByClienteid(clienteId);
+                    Cliente cliente = clienteService.getClientById(clienteId);
                     if (cliente != null) {
                         List<Cuenta> cuentaLista = cuentaRepository.findByCliente(cliente);
                         if (cuentaLista != null && !cuentaLista.isEmpty()) {
@@ -62,9 +63,10 @@ public class ReporteService {
     }
 
     public List<ReporteDto> generar(List<Movimiento> listaMovimientos) {
-        List<ReporteDto> listaReporte = new ArrayList<>();
+   
         if (listaMovimientos != null && !listaMovimientos.isEmpty()) {
-            for (Movimiento mov : listaMovimientos) {
+            return  listaMovimientos.stream()
+            .map(mov -> {
                 ReporteDto reporteDto = new ReporteDto();
                 reporteDto.setFecha(simpleDateFormat.format(mov.getFecha()));
                 reporteDto.setCliente(mov.getCuenta().getCliente().getNombre());
@@ -78,10 +80,16 @@ public class ReporteService {
                 reporteDto.setMovimiento(mov.getValor());
                 reporteDto.setSaldoDisponible(mov.getSaldo());
 
-                listaReporte.add(reporteDto);
-            }
+                return  reporteDto;
+                
+            })
+            .collect(Collectors.toList());
+        }else
+
+        {
+           return Collections.emptyList(); 
         }
-        return listaReporte;
+
     }
 
     public boolean validar(String valor) {

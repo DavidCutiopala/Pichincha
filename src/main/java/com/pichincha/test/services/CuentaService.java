@@ -5,42 +5,43 @@ import java.math.BigDecimal;
 import com.pichincha.test.dto.CuentaDto;
 import com.pichincha.test.entities.Cliente;
 import com.pichincha.test.entities.Cuenta;
-import com.pichincha.test.excepions.EntityNotFoundException;
-import com.pichincha.test.repositories.ClienteRepository;
+import com.pichincha.test.exception.EntityNotFoundException;
 import com.pichincha.test.repositories.CuentaRepository;
 
+import lombok.extern.slf4j.Slf4j;
+
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class CuentaService {
 
     @Autowired
     private CuentaRepository cuentaRepository;
 
     @Autowired
-    private ClienteRepository clienteRepository;
+    ClienteService clienteService;
 
-    public ResponseEntity<?> crearCuenta(CuentaDto cuentaDto) {
+    @Autowired
+    private ModelMapper modelMapper;
 
-        Cliente cliente = clienteRepository.findByClienteid(cuentaDto.getClienteId());
+    public Cuenta crearCuenta(CuentaDto cuentaDto) {
+
+        Cliente cliente = clienteService.getClientById(cuentaDto.getClienteId());
         if (cliente != null) {
-            Cuenta cuenta = new Cuenta();
-            cuenta.setCliente(cliente);
-            cuenta.setEstado(cuentaDto.getEstado());
-            cuenta.setNumeroCuenta(cuentaDto.getNumeroCuenta());
-            cuenta.setSaldoInicial(cuentaDto.getSaldoInicial());
-            cuenta.setTipoCuenta(cuentaDto.getTipoCuenta());
 
-            cuentaRepository.save(cuenta);
-            return new ResponseEntity<String>("Cuenta Creada Correctamente", HttpStatus.CREATED);
-
+            log.info("Creando cuenta bancaria");
+            Cuenta cuenta = modelMapper.map(cuentaDto, Cuenta.class);
+            return cuentaRepository.save(cuenta);
         } else {
-            throw new EntityNotFoundException(Cliente.class, "Cliente Id",
-                    cuentaDto.getClienteId() != null ? cuentaDto.getClienteId() : "es nulo");
+
+            throw new EntityNotFoundException(Cliente.class, "Id cliente", cuentaDto.getClienteId());
         }
+
     }
 
     public ResponseEntity<?> editarCuenta(CuentaDto cuentaDto) {

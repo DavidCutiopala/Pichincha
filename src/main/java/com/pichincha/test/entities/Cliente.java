@@ -7,6 +7,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import lombok.Data;
 
@@ -21,6 +23,8 @@ public class Cliente extends Persona {
     @Column(name = "id")
     private Long id;
 
+    @NotNull
+    @NotBlank
     @Column(name = "clienteid", nullable = false)
     private String clienteid;
 
@@ -29,5 +33,4 @@ public class Cliente extends Persona {
 
     @Column(name = "estado", nullable = false)
     private String estado;
-
 }

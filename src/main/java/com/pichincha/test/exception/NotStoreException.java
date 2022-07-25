@@ -1,4 +1,4 @@
-package com.pichincha.test.excepions;
+package com.pichincha.test.exception;
 
 public class NotStoreException extends RuntimeException {
 

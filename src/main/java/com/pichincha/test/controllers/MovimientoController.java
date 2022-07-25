@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.annotations.ApiOperation;
 
 @RestController
-@RequestMapping(value = "/api/movimientos")
+@RequestMapping(value = "/test/movimientos")
 public class MovimientoController {
 
 	@Autowired

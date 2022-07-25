@@ -16,7 +16,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
 @RestController
-@RequestMapping(value = "/api/reportes")
+@RequestMapping(value = "/test/reportes")
 public class ReporteController {
 
 	@Autowired

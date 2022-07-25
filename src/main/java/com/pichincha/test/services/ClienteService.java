@@ -2,91 +2,81 @@ package com.pichincha.test.services;
 
 import com.pichincha.test.dto.ClienteDto;
 import com.pichincha.test.entities.Cliente;
-import com.pichincha.test.excepions.EntityNotFoundException;
+import com.pichincha.test.exception.NotStoreException;
 import com.pichincha.test.repositories.ClienteRepository;
+import com.pichincha.test.services.interfaces.IClienteService;
 
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.Optional;
+
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * @author : David Cutiopala
+ * @date : 24 de Julio del 2022
+ * @description: Servicio para gestionar funcionalidades del cliente.
+ */
 
 @Service
-public class ClienteService {
+@Slf4j
+public class ClienteService implements IClienteService {
 
     @Autowired
     private ClienteRepository clienteRepository;
 
-    public ResponseEntity<?> crearCliente(ClienteDto clienteDto) {
+    @Autowired
+    private ModelMapper modelMapper;
 
-        Cliente cliente = new Cliente();
-        cliente.setDireccion(clienteDto.getDireccion());
-        cliente.setEdad(clienteDto.getEdad());
-        cliente.setGenero(clienteDto.getGenero());
-        cliente.setIdentificacion(clienteDto.getIdentificacion());
-        cliente.setNombre(clienteDto.getNombre());
-        cliente.setTelefono(clienteDto.getTelefono());
-        cliente.setContrasena(clienteDto.getContrasena());
-        cliente.setEstado(clienteDto.getEstado());
-        cliente.setClienteid(clienteDto.getClienteid());
+    /**
+     * @author : David Cutiopala
+     * @date : 24 de Julio del 2022
+     * @description: Función para crear un cliente.
+     * @param ClienteDto Objeto que contiene los datos de entrada
+     * @return Client Objeto que contiene solo la informacion del cliente
+     */
+
+    public Cliente crearCliente(ClienteDto clienteDto) {
+
+        log.info("Creando cliente");
+        Cliente cliente = modelMapper.map(clienteDto, Cliente.class);
+        return clienteRepository.save(cliente);
+    }
+
+    @Transactional
+    public Cliente updateClient(ClienteDto clienteDto) {
+
+        log.info("Actualizando cliente");
+        getClientById(clienteDto.getClienteid());
+        Cliente cliente = modelMapper.map(clienteDto, Cliente.class);
         clienteRepository.save(cliente);
-        return new ResponseEntity<String>("Cliente Creado Correctamente", HttpStatus.CREATED);
-    }
-
-    public ResponseEntity<?> editarCliente(ClienteDto clienteDto) {
-
-        Cliente cliente = clienteRepository.findByClienteid(clienteDto.getClienteid());
-        if (cliente != null && cliente.getId() != null) {
-            cliente.setDireccion(clienteDto.getDireccion() != null && clienteDto.getDireccion().compareTo("") != 0
-                    ? clienteDto.getDireccion()
-                    : cliente.getDireccion());
-            cliente.setEdad(clienteDto.getEdad() != 0 ? clienteDto.getEdad() : cliente.getEdad());
-            cliente.setGenero(
-                    clienteDto.getGenero() != null && clienteDto.getGenero().compareTo("") != 0 ? clienteDto.getGenero()
-                            : cliente.getGenero());
-            cliente.setIdentificacion(
-                    clienteDto.getIdentificacion() != null && clienteDto.getIdentificacion().compareTo("") != 0
-                            ? clienteDto.getIdentificacion()
-                            : cliente.getIdentificacion());
-            cliente.setNombre(
-                    clienteDto.getNombre() != null && clienteDto.getNombre().compareTo("") != 0 ? clienteDto.getNombre()
-                            : cliente.getNombre());
-            cliente.setTelefono(clienteDto.getTelefono() != null && clienteDto.getTelefono().compareTo("") != 0
-                    ? clienteDto.getTelefono()
-                    : cliente.getTelefono());
-            cliente.setContrasena(clienteDto.getContrasena() != null && clienteDto.getContrasena().compareTo("") != 0
-                    ? clienteDto.getContrasena()
-                    : cliente.getContrasena());
-            cliente.setEstado(
-                    clienteDto.getEstado() != null && clienteDto.getEstado().compareTo("") != 0 ? clienteDto.getEstado()
-                            : cliente.getEstado());
-            clienteRepository.save(cliente);
-            return new ResponseEntity<String>("Cliente Editado Correctamente", HttpStatus.OK);
-
-        } else {
-            throw new EntityNotFoundException(Cliente.class, "Cliente Id",
-                    clienteDto.getClienteid() != null ? clienteDto.getClienteid() : "es nulo");
-        }
-    }
-
-    public ResponseEntity<?> eliminarCliente(String clienteId) {
-
-        Cliente cliente = clienteRepository.findByClienteid(clienteId);
-        if (cliente != null && cliente.getId() != null) {
-            clienteRepository.delete(cliente);
-            return new ResponseEntity<String>("Cliente Eliminado Correctamente", HttpStatus.OK);
-        } else {
-            throw new EntityNotFoundException(Cliente.class, "Cliente Id",
-                    clienteId);
-        }
-    }
-
-    public Cliente obtenerCliente(String clienteId) {
-        Cliente cliente = clienteRepository.findByClienteid(clienteId);
-        if (cliente == null) {
-            throw new EntityNotFoundException(Cliente.class, "Cliente Id",
-                    clienteId);
-        }
         return cliente;
+    }
+
+    @Transactional
+    public Boolean eliminarCliente(String clienteId) {
+        log.info("Eliminando cliente");
+        Boolean clienteDelete = false;
+
+        Cliente cliente = getClientById(clienteId);
+        clienteRepository.delete(cliente);
+        return clienteDelete;
+
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Cliente getClientById(String clienteId) {
+
+        log.info("Consultando cliente");
+        Optional<Cliente> cliente = clienteRepository.findByClienteid(clienteId);
+        if (!cliente.isPresent()) {
+            throw new NotStoreException("No existe el cliente con ID: " + clienteId);
+        }
+        return cliente.get();
     }
 
 }

@@ -22,7 +22,7 @@ public class Persona {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idPersona")
     private Long id;
-
+    
     @Column(name = "nombre", nullable = false)
     private String nombre;
 
